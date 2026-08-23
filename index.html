@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naruto Shippuden Encyclopedia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-orange: #ff6600;
+            --neon-blue: #00d4ff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        h1, h2, .neon-text {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Neon Glow Effect */
+        .neon-glow {
+            text-shadow: 0 0 5px var(--neon-orange), 
+                         0 0 10px var(--neon-orange), 
+                         0 0 20px var(--neon-orange);
+            color: #fff;
+        }
+
+        .neon-border {
+            border: 1px solid var(--neon-orange);
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.3);
+        }
+
+        /* Video Background Styling */
+        #video-bg {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -2;
+            object-fit: cover;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.9) 100%);
+            z-index: -1;
+        }
+
+        /* Card Animations */
+        .character-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .character-card.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .character-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-orange); border-radius: 10px; }
+
+        .filter-btn.active {
+            background-color: var(--neon-orange);
+            color: black;
+            box-shadow: 0 0 15px var(--neon-orange);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Background Video -->
+    <video autoplay muted loop id="video-bg">
+        <source src="naruto-bg.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+    <div class="overlay"></div>
+
+    <div class="container mx-auto px-4 py-12 relative z-10">
+        
+        <!-- Header Section -->
+        <header class="text-center mb-16">
+            <h1 class="text-5xl md:text-7xl font-black neon-glow mb-4">Shippuden</h1>
+            <p class="text-xl md:text-2xl font-light text-gray-300 tracking-widest uppercase">The Ultimate Shinobi Encyclopedia</p>
+        </header>
+
+        <!-- Navigation / Filter Menu -->
+        <nav class="flex flex-wrap justify-center gap-4 mb-12">
+            <button onclick="filterCharacters('All')" class="filter-btn active px-6 py-2 rounded-full border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black transition-all duration-300 font-bold">ALL</button>
+            <button onclick="filterCharacters('Hokage')" class="filter-btn px-6 py-2 rounded-full border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black transition-all duration-300 font-bold">HOKAGE</button>
+            <button onclick="filterCharacters('Legendary Sannin')" class="filter-btn px-6 py-2 rounded-full border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black transition-all duration-300 font-bold">SANNIN</button>
+            <button onclick="filterCharacters('Jōnin')" class="filter-btn px-6 py-2 rounded-full border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black transition-all duration-300 font-bold">JŌNIN</button>
+            <button onclick="filterCharacters('Chūnin')" class="filter-btn px-6 py-2 rounded-full border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black transition-all duration-300 font-bold">CHŪNIN</button>
+        </nav>
+
+        <!-- Character Grid -->
+        <div id="character-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Dynamic Content Loaded Here -->
+        </div>
+    </div>
+    <!-- Invisible Audio Track Element -->
+<audio id="bg-music" loop>
+    <source src="naruto-theme.mp3" type="audio/mp3">
+</audio>
+
+<!-- Glowing Music Controller Button -->
+<button onclick="toggleMusic()" id="music-btn" class="fixed bottom-6 right-6 z-50 bg-black/80 backdrop-blur-md border border-orange-500 text-orange-500 px-5 py-3 rounded-full font-black tracking-wider text-xs flex items-center gap-2 hover:bg-orange-500 hover:text-black transition-all duration-300 shadow-[0_0_15px_rgba(255,102,0,0.4)]">
+    <svg id="music-icon" xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
+    </svg>
+    <span id="music-text">PLAY SOUNDTRACK</span>
+</button>
+
+
+    <script>
+        const characters = [
+            {
+                name: "Naruto Uzumaki",
+                ranks: ["Hokage", "Chūnin"],
+                status: "Alive (7th Hokage)",
+                description: "The Child of Prophecy and Hero of the Hidden Leaf. After the Fourth Great Ninja War, he fulfilled his dream of becoming the Hokage.",
+                ability: "Six Paths Sage Mode",
+                image: "https://w0.peakpx.com/wallpaper/289/697/HD-wallpaper-naruto-baryon-mode-naruto-naruto-shippuden-naruto-boruto-naruto-next-generation-kurama.jpg"
+            },
+            {
+                name: "Sasuke Uchiha",
+                ranks: ["Jōnin"],
+                status: "Alive (Shadow Hokage)",
+                description: "The last pure Uchiha. Redeemed after the war, he travels the world protecting Konoha from the shadows with his Rinnegan.",
+                ability: "Perfect Susano'o / Rinnegan",
+                image: "https://static0.cbrimages.com/wordpress/wp-content/uploads/2024/02/mixcollage-13-feb-2024-08-09-pm-5380.jpg?q=50&fit=crop&w=480&h=400&dpr=1.5"
+            },
+            {
+                name: "Kakashi Hatake",
+                ranks: ["Hokage", "Jōnin"],
+                status: "Alive (6th Hokage Retired)",
+                description: "The Copy Ninja. Served as the Sixth Hokage following the war before passing the torch to Naruto.",
+                ability: "Purple Electricity",
+                image: "https://c4.wallpaperflare.com/wallpaper/777/19/717/anime-naruto-kakashi-hatake-sharingan-naruto-wallpaper-preview.jpg"
+            },
+            {
+                name: "Itachi Uchiha",
+                ranks: ["Jōnin"],
+                status: "Deceased",
+                description: "A hero who operated in the dark. He protected the village by sacrificing his reputation and family.",
+                ability: "Tsukuyomi / Izanami",
+                image: "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2022/12/itachi-uchiha-naruto.jpg"
+            },
+            {
+                name: "Jiraiya",
+                ranks: ["Legendary Sannin"],
+                status: "Deceased",
+                description: "The Toad Sage. Mentor to Minato, Nagato, and Naruto. His legacy paved the way for world peace.",
+                ability: "Sage Mode (Toad)",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2CKQ5METaWqOF6xHOTmMOsVSPJxMcWG2FWL6CsLxRPg&s=10"
+            },
+            {
+                name: "Tsunade Senju",
+                ranks: ["Legendary Sannin", "Hokage"],
+                status: "Alive (5th Hokage Retired)",
+                description: "The world's greatest Medical-nin. She led the village through the Pain invasion and the Fourth Ninja War.",
+                ability: "Mitotic Regeneration",
+                image: "https://static.wikia.nocookie.net/naruto/images/b/b3/Tsunade_infobox2.png/revision/latest/scale-to-width-down/300?cb=20230315211457"
+            },
+            {
+                name: "Orochimaru",
+                ranks: ["Legendary Sannin"],
+                status: "Alive (Under Observation)",
+                description: "The seeker of immortality. After the war, he maintains a tenuous peace with Konoha while continuing his research.",
+                ability: "Living Corpse Reincarnation",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQx0tpsXjngGhuV4RWnCbm2EHTy7V4hNe5FCKe6zUef6rctOVUtxKYYUAmY&s=10"
+            },
+            {
+                name: "Minato Namikaze",
+                ranks: ["Hokage"],
+                status: "Deceased (Spirit Returned)",
+                description: "The Yellow Flash. The Fourth Hokage who sacrificed his life to seal the Nine-Tails and protect his son.",
+                ability: "Flying Thunder God Technique",
+                image: "https://i.pinimg.com/736x/b1/89/d6/b189d658237f6bb9d1e9cb320b628fd6.jpg"
+            },
+            {
+                name: "Shikamaru Nara",
+                ranks: ["Jōnin", "Chūnin"],
+                status: "Alive (Hokage Advisor)",
+                description: "The brilliant strategist. He rose from a lazy Chūnin to become the indispensable advisor to the 7th Hokage.",
+                ability: "Shadow Possession Jutsu",
+                image: "https://static.wikia.nocookie.net/naruto-saint-seiya-omega-fairy-tail/images/9/9a/Shikamaru_Nara.png/revision/latest?cb=20160109171208"
+            },
+            {
+                name: "Hinata Hyuga",
+                ranks: ["Chūnin"],
+                status: "Alive (Konoha Citizen)",
+                description: "The gentle-hearted Hyuga heiress. She married Naruto and became a loving mother while supporting him as Hokage.",
+                ability: "Byakugan / Gentle Fist",
+                image: "https://i.redd.it/9t91npulpxve1.jpeg"
+            },
+            {
+                name: "Rock Lee",
+                ranks: ["Jōnin"],
+                status: "Alive (Konoha Citizen)",
+                description: "The taijutsu master. Despite lacking ninjutsu, he became a formidable ninja through sheer determination and hard work.",
+                ability: "Eight Gates",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSit-aANypj61E4JBTt2qEhHUumlmp_I9jJP4WTUebPuw&s=10"
+            },
+            {
+                name: "Neji Hyuga",
+                ranks: ["Jōnin"],
+                status: "Rip",
+                description: "The prodigy of the Hyuga clan. He sacrificed himself during the Fourth Great Ninja War to protect his comrades.",
+                ability: "Byakugan / Gentle Fist",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1adfyicZ41sMd-dBlmYC8wpuRohtixpxy7YbM6OJCww&s=10"
+            },
+            {
+                name: "Gaara",
+                ranks: ["Kazekage", "Jōnin"],
+                status: "Alive (Konoha Citizen)",
+                description: "The Kazekage of Suna. He is known for his incredible strength and his ability to control sand.",
+                ability: "Sand Manipulation",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2apQkFzP00pbxgLwUS8tqp57QfIJnIABphudqGNeN9A&s=10"
+            },
+            {
+                name: "Killer Bee",
+                ranks: ["Jōnin"],
+                status: "Alive (Konoha Ally)",
+                description: "The Jinchūriki of the Eight-Tails. He is a master of kenjutsu and rap, known for his unique fighting style.",
+                ability: "Lariat / Tailed Beast Mode",
+                image: "https://static.wikia.nocookie.net/naruto/images/8/81/Acrobat.PNG/revision/latest/scale-to-width-down/985?cb=20150124180516"
+            },
+            {
+                name: "Madara Uchiha",
+                ranks: ["Legendary Sannin"],
+                status: "Deceased",
+                description: "The legendary Uchiha clan leader. He sought to create a world of peace through the Infinite Tsukuyomi.",
+                ability: "Eternal Mangekyō Sharingan / Rinnegan",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQb4fKlUMzy2rUYc10_y4fU-fho6Guswq68ziy5hYRWJzPZN8s1cErmU9A&s=10"
+            },
+            {
+                name: "Obito Uchiha",
+                ranks: ["Jōnin"],
+                status: "Rip",
+                description: "Once a hero, he became the masked villain Tobi. He sought to create a world without pain through the Eye of the Moon Plan.",
+                ability: "Kamui / Rinnegan",
+                image: "https://static0.cbrimages.com/wordpress/wp-content/uploads/2020/09/obito-Cropped.jpg?w=1600&h=900&fit=crop"
+            },
+            {
+                name: "Nagato (Pain)",
+                ranks: ["Jōnin"],
+                status: "Rip",
+                description: "The leader of the Akatsuki. He sought to bring peace through pain and was a former student of Jiraiya.",
+                ability: "Rinnegan / Six Paths of Pain",
+                image: "https://static0.cbrimages.com/wordpress/wp-content/uploads/2021/10/pain-six-paths-from-naruto.jpg?w=1200&h=675&fit=crop"
+            },
+            {
+                name: "Kushina Uzumaki",
+                ranks: ["Jōnin"],
+                status: "Rip",
+                description: "The second Jinchūriki of the Nine-Tails. She was Naruto's mother and a loving wife to Minato.",
+                ability: "Chakra Chains / Sealing Techniques",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcRyeDoIknfjH-VwaCPEGWJQpCGhOjotukw411rqzQTg&s=10"
+            },
+            {
+                name: "Hiruzen Sarutobi",
+                ranks: ["Hokage"],
+                status: "Rip",
+                description: "The Third Hokage. Known as the Professor, he was a wise and powerful leader who protected Konoha for decades.",
+                ability: "Mastery of All Forms of Ninjutsu",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMjzjnadRH0szgqWpHkQxqfhrPsSiyH7nFkReuJpqI-g&s"
+            },
+            {
+                name: "sakura Haruno",
+                ranks: ["Jōnin"],
+                status: "Active",
+                description: "A skilled medical ninja and member of Team 7. She is known for her exceptional healing abilities and strong determination.",
+                ability: "Medical Ninjutsu / Chakra Control",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfQHkwwx6rNXEgdeT6KzwdXAq5FOL0QCkCi06IAGvG-w&s"
+            },
+            {
+                name: "Sai",
+                ranks: ["Jōnin"],
+                status: "Active",
+                description: "A member of Team Kakashi and a skilled artist ninja. He uses his ink-based techniques for reconnaissance and combat.",
+                ability: "Ink Techniques / Superhuman Agility",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2aWGgSFpbdtgCsWSjnugtcDAx1b9nCAiHI1oVvQbbiQ&s=10"
+            },
+            {
+                name: "Shino Aburame",
+                ranks: ["Jōnin"],
+                status: "Active",
+                description: "A member of Team 8 and a master of insect-based techniques. He uses his bugs for tracking and combat.",
+                ability: "Insect Manipulation / Stealth Tactics",
+                image: "https://static0.srcdn.com/wordpress/wp-content/uploads/2020/01/Shino-Aburame-Naruto.jpg"
+            },
+            {
+                name: "Kiba Inuzuka",
+                ranks: ["Jōnin"],
+                status: "Active",
+                description: "A member of Team 8 and a skilled tracker. He fights alongside his canine companion, Akamaru.",
+                ability: "Beast Mimicry / Enhanced Senses",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuBzTljjbMsG6XS31VFJ52IN1SKX6i-IVPqT12EJkBxQ&s=10"
+            },
+            {
+                name: "hashirama Senju",
+                ranks: ["Hokage"],
+                status: "Rip",
+                description: "the First Hokage and God of Shinobi, is renowned as one of the most powerful ninja in history. His unrivaled power stems from an immense, Tailed Beast-level chakra reserve, a unique elemental Kekkei Genkai, and godly passive healing.",
+                ability: " Wood Release: True Several Thousand Hands/ Sage Mode",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRDZ847uVslUmUzz2kmVD91fvvoZwqDpEmMtOw-DAl7zgzBBrFcA6WNkEN&s=10"
+            },
+            {
+                name: "tobirama Senju",
+                ranks: ["Hokage"],
+                status: "Rip",
+                description: "the Second Hokage and a legendary figure in the history of the Hidden Leaf Village. He was known for his exceptional tactical skills and leadership.",
+                ability: " Flying Thunder God Technique / High-Pressure Water Release",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNaCpB9OeXWrevXYEkCq4g-Les6adyQgx7OCSstBdSsw&s=10"
+            }
+        ];
+
+        function renderCharacters(filter = 'All') {
+            const grid = document.getElementById('character-grid');
+            grid.innerHTML = '';
+
+            const filteredData = filter === 'All' 
+                ? characters 
+                : characters.filter(char => char.ranks.includes(filter));
+
+            filteredData.forEach((char, index) => {
+                const card = document.createElement('div');
+                card.className = `character-card bg-black bg-opacity-60 rounded-xl overflow-hidden neon-border backdrop-blur-md`;
+                
+                card.innerHTML = `
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="${char.image}" alt="${char.name}" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                            <span class="text-xs font-bold bg-orange-600 text-white px-2 py-1 rounded uppercase">${char.ranks[0]}</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-white mb-2 neon-text">${char.name}</h3>
+                        <p class="text-sm text-gray-400 mb-4 line-clamp-3">${char.description}</p>
+                        <div class="space-y-2 border-t border-gray-800 pt-4">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-orange-500 font-bold uppercase">Status:</span>
+                                <span class="${char.status.includes('Deceased') ? 'text-red-400' : 'text-green-400'}">${char.status}</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-orange-500 font-bold uppercase">Signature:</span>
+                                <span class="text-blue-300 italic">${char.ability}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+                
+                // Staggered fade-in effect
+                setTimeout(() => {
+                    card.classList.add('show');
+                }, index * 100);
+            });
+        }
+
+        function filterCharacters(rank) {
+            // Update button styles
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.innerText.toUpperCase() === rank.toUpperCase() || 
+                   (rank === 'Legendary Sannin' && btn.innerText === 'SANNIN')) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Re-render
+            renderCharacters(rank);
+        }
+
+        // Initial Load
+        window.onload = () => renderCharacters();
+        function toggleMusic() {
+    const music = document.getElementById('bg-music');
+    const btnText = document.getElementById('music-text');
+    const btn = document.getElementById('music-btn');
+
+    if (music.paused) {
+        music.play().catch(err => console.log("Audio waiting for user click interaction: ", err));
+        btnText.innerText = "MUTE THEME";
+        btn.style.boxShadow = "0 0 20px #00d4ff";
+        btn.style.borderColor = "#00d4ff";
+        btn.classList.add('text-cyan-400', 'border-cyan-400');
+    } else {
+        music.pause();
+        btnText.innerText = "PLAY SOUNDTRACK";
+        btn.style.boxShadow = "0 0 15px rgba(255, 102, 0, 0.4)";
+        btn.style.borderColor = "#ff6600";
+        btn.classList.remove('text-cyan-400', 'border-cyan-400');
+    }
+}
+
+    </script>
+</body>
+</html>
